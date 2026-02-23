@@ -70,10 +70,7 @@ function Remove-Files($path) {
         try {
             Get-ChildItem $path -Recurse -Force -ErrorAction SilentlyContinue |
             Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-            Write-Host "CLEANED: $path" -ForegroundColor Green
-        } catch {
-            Write-Host "SKIPPED: $path" -ForegroundColor Yellow
-        }
+        } catch {}
     }
 }
 
@@ -88,10 +85,7 @@ function Scan-And-Clean($basePath) {
             try {
                 Get-ChildItem $_.FullName -Recurse -Force -ErrorAction SilentlyContinue |
                 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-                Write-Host "AUTO CLEANED: $($_.FullName)" -ForegroundColor DarkGreen
-            } catch {
-                 Write-Host "SKIPPED: $($_.FullName)" -ForegroundColor Yellow
-            }
+            } catch {}
         }
     }
 }
@@ -354,6 +348,7 @@ switch ($choice) {
     }
 
 }
+
 
 
 
