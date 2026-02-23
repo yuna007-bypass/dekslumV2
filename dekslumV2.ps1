@@ -230,7 +230,7 @@ Enable-NetAdapter -Name $adapterName -Confirm:$false
     Run-CacheCleaner
 
     #Clear-Host
-    Write-Host "Processing..." -ForegroundColor Yellow
+    #Write-Host "Processing..." -ForegroundColor Yellow
 
 # =========================================
 # Power Plan - Dekslum (High Perf Base)
@@ -427,6 +427,7 @@ switch ($choice) {
     }
 
 }
+
 
 
 
