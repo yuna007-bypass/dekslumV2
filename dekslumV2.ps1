@@ -27,6 +27,7 @@ $inputKey = Read-Host "Enter License Key"
 
 if (-not $licenses.ContainsKey($inputKey)) {
     Write-Host "Invalid License Key!" -ForegroundColor Red
+    Start-Sleep -Seconds 3
     exit
 }
 
@@ -42,10 +43,12 @@ $generatedHash = [BitConverter]::ToString($hash) -replace "-",""
 # ตรวจสอบ
 if ($licenses[$inputKey] -ne $generatedHash) {
     Write-Host "This key is not valid for this user!" -ForegroundColor Red
+    Start-Sleep -Seconds 3
     exit
 }
 
 Write-Host "License Verified!" -ForegroundColor Green
+Start-Sleep -Seconds 3
 
 Clear-Host
 
@@ -234,4 +237,5 @@ switch ($choice) {
     }
 
 }
+
 
