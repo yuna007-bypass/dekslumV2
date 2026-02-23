@@ -2,6 +2,21 @@
 
 Clear-Host
 
+# ================================
+# LICENSE SYSTEM
+# ================================
+
+$license = Read-Host "Enter License Key"
+
+$validKey = "dekslumV2-bas"   # <-- เปลี่ยนเป็นคีย์ที่ต้องการ
+
+if ($license -ne $validKey) {
+    Write-Host ""
+    Write-Host "Invalid License Key!" -ForegroundColor Red
+    Start-Sleep 2
+    exit
+}
+
 Write-Host "1 : Install Dekslum"
 Write-Host "2 : Uninstall Dekslum"
 Write-Host ""
@@ -187,5 +202,3 @@ switch ($choice) {
     }
 
 }
-
-
