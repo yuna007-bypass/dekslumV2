@@ -1,7 +1,5 @@
 #Requires -RunAsAdministrator
 
-Clear-Host
-
 # ================================
 # LICENSE SYSTEM
 # ================================
@@ -16,6 +14,8 @@ if ($license -ne $validKey) {
     Start-Sleep 2
     exit
 }
+
+Clear-Host
 
 Write-Host "1 : Install Dekslum"
 Write-Host "2 : Uninstall Dekslum"
