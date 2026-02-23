@@ -1,19 +1,30 @@
 #Requires -RunAsAdministrator
 
 # ================================
-# LICENSE SYSTEM
+# LICENSE + HWID FIXED
 # ================================
+# เอา HWID ไปผูกกับ License ในสคริปต์  คำสั่ง whoami /user รันใน cmd
+คำสั่ง whoami /user รันใน cmd
+$licenses = @{
+    "admin" = "4C4C4544-0033-4A10-8058-B4C04F4C3232"
+    "DEMO-KEY-999" = "A1B2C3D4-AAAA-BBBB-CCCC-111111111111"
+}
 
 $license = Read-Host "Enter License Key"
 
-$validKey = "dekslumV2-bas"   # <-- เปลี่ยนเป็นคีย์ที่ต้องการ
-
-if ($license -ne $validKey) {
-    Write-Host ""
+if (-not $licenses.ContainsKey($license)) {
     Write-Host "Invalid License Key!" -ForegroundColor Red
-    Start-Sleep 2
     exit
 }
+
+$currentHWID = (Get-CimInstance Win32_ComputerSystemProduct).UUID
+
+if ($licenses[$license] -ne $currentHWID) {
+    Write-Host "This key is not valid for this device!" -ForegroundColor Red
+    exit
+}
+
+Write-Host "License Verified!" -ForegroundColor Green
 
 Clear-Host
 
