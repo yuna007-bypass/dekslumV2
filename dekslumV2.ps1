@@ -289,7 +289,12 @@ powercfg -setactive $newGUID | Out-Null
     netsh int tcp set global rss=enabled | Out-Null
     netsh int tcp set global ecncapability=disabled | Out-Null
     netsh int tcp set global timestamps=disabled | Out-Null
-
+    
+    # ==== หน้าจอแบบในรูป ====
+    Write-Host ""
+    Write-Host "Successfully" -ForegroundColor Green
+    Write-Host "Press Enter to continue..." -ForegroundColor White
+    Read-Host
 }
 
 # ================================
@@ -399,6 +404,12 @@ function Reset-Default {
     netsh int tcp reset | Out-Null
     
     Write-Host "Success" -ForegroundColor Green
+
+    # ==== หน้าจอแบบในรูป ====
+    Write-Host ""
+    Write-Host "Successfully" -ForegroundColor Green
+    Write-Host "Press Enter to continue..." -ForegroundColor White
+    Read-Host
 }
 # ================================
 # MENU
@@ -416,4 +427,5 @@ switch ($choice) {
     }
 
 }
+
 
