@@ -137,10 +137,11 @@ function Run-Boost {
     Clear-Host
     Write-Host "Processing..." -ForegroundColor Yellow
 
-    # Power Plan (Force Ultimate)
-powercfg -restoredefaultschemes | Out-Null
-powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 | Out-Null
-powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61 | Out-Null
+    $existing = powercfg -l | Select-String "Performance Dekslum"
+
+if (-not $existing) {
+    powercfg -duplicatescheme $ultimateGUID | Out-Null
+}
 
     # Boot Config
     bcdedit /set disabledynamictick yes | Out-Null
@@ -233,6 +234,7 @@ switch ($choice) {
     }
 
 }
+
 
 
 
