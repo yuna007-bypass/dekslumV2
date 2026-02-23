@@ -27,7 +27,7 @@ $inputKey = Read-Host "Enter License Key"
 
 if (-not $licenses.ContainsKey($inputKey)) {
     Write-Host "Invalid License Key!" -ForegroundColor Red
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 1
     exit
 }
 
@@ -43,12 +43,12 @@ $generatedHash = [BitConverter]::ToString($hash) -replace "-",""
 # ตรวจสอบ
 if ($licenses[$inputKey] -ne $generatedHash) {
     Write-Host "This key is not valid for this user!" -ForegroundColor Red
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 1
     exit
 }
 
 Write-Host "License Verified!" -ForegroundColor Green
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 1
 
 Clear-Host
 
@@ -137,48 +137,33 @@ function Run-Boost {
     Clear-Host
     Write-Host "Processing..." -ForegroundColor Yellow
 
-    # =========================================
-    # Power Plan - Create Only One (Dekslum FIX)
-    # =========================================
+# =========================================
+# Power Plan - Dekslum (High Perf Base)
+# =========================================
 
-    $ultimateBase = "e9a42b02-d5df-448d-aa00-03f14749eb61"
-    $planName = "Performance Dekslum"
+$baseGUID = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"  # High Performance
+$planName = "Performance Dekslum"
 
-    # ลบของเก่าถ้ามี
-    $existing = powercfg -l | Select-String $planName
-    if ($existing) {
-        $oldGUID = ($existing -split '\s+')[3]
-        powercfg -delete $oldGUID | Out-Null
+# ลบของเก่าถ้ามี
+$existing = powercfg -l | Select-String $planName
+if ($existing) {
+    $oldGUID = ($existing -split '\s+')[3]
+    powercfg -delete $oldGUID | Out-Null
 }
 
-    # นับจำนวน scheme ก่อนสร้าง
-    $before = (powercfg -l | Select-String "GUID").Count
+# Clone High Performance
+$duplicateOutput = powercfg -duplicatescheme $baseGUID
+$newGUID = ($duplicateOutput -split '\s+')[3]
 
-    # Clone Ultimate
-    powercfg -duplicatescheme $ultimateBase | Out-Null
+# ตั้งชื่อ
+powercfg -changename $newGUID $planName "Dekslum Custom Performance Plan" | Out-Null
 
-    Start-Sleep -Milliseconds 500
+# บังคับ CPU 100%
+powercfg /setacvalueindex $newGUID sub_processor PROCTHROTTLEMIN 100
+powercfg /setacvalueindex $newGUID sub_processor PROCTHROTTLEMAX 100
 
-    # นับหลังสร้าง
-    $afterList = powercfg -l
-    $afterCount = ($afterList | Select-String "GUID").Count
-
-    if ($afterCount -gt $before) {
-
-    # หา GUID ตัวใหม่ล่าสุด
-    $newGUID = ($afterList | Select-String "GUID")[-1].ToString().Split()[3]
-
-} else {
-
-    Write-Host "Ultimate Performance not supported on this Windows edition." -ForegroundColor Red
-    return
-}
-
-    # เปลี่ยนชื่อ
-    powercfg -changename $newGUID $planName "Dekslum Custom Ultimate Plan" | Out-Null
-
-    # เปิดใช้งาน
-    powercfg -setactive $newGUID | Out-Null
+# เปิดใช้งาน
+powercfg -setactive $newGUID | Out-Null
 
     # Boot Config
     bcdedit /set disabledynamictick yes | Out-Null
@@ -271,4 +256,5 @@ switch ($choice) {
     }
 
 }
+
 
