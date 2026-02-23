@@ -137,11 +137,31 @@ function Run-Boost {
     Clear-Host
     Write-Host "Processing..." -ForegroundColor Yellow
 
-    $existing = powercfg -l | Select-String "Performance Dekslum"
+    # =========================================
+    # Power Plan - Create Only One (Dekslum)
+    # =========================================
 
-if (-not $existing) {
-    powercfg -duplicatescheme $ultimateGUID | Out-Null
-}
+    $ultimateBase = "e9a42b02-d5df-448d-aa00-03f14749eb61"
+    $planName = "Performance Dekslum"
+
+    # ลบของเก่าถ้ามี
+    $existing = powercfg -l | Select-String $planName
+    if ($existing) {
+        $oldGUID = ($existing -split '\s+')[3]
+        powercfg -delete $oldGUID | Out-Null
+    }
+
+    # Clone จาก Ultimate
+    $duplicateOutput = powercfg -duplicatescheme $ultimateBase
+
+    # ดึง GUID ใหม่ที่ถูกสร้าง
+    $newGUID = ($duplicateOutput -split '\s+')[3]
+
+    # เปลี่ยนชื่อ
+    powercfg -changename $newGUID $planName "Dekslum Custom Ultimate Plan" | Out-Null
+
+    # เปิดใช้งาน
+    powercfg -setactive $newGUID | Out-Null
 
     # Boot Config
     bcdedit /set disabledynamictick yes | Out-Null
@@ -234,6 +254,7 @@ switch ($choice) {
     }
 
 }
+
 
 
 
