@@ -96,7 +96,7 @@ function Scan-And-Clean($basePath) {
     }
 }
 
-function Run-Cleaner {
+function Run-Boost {
 # ----------------
 # Windows TEMP
 # ----------------
@@ -152,7 +152,7 @@ function Run-Cleaner {
 # =========================
 # APPLY MODE
 # =========================
-function Run-Network {
+function Run-Boost {
 
     Write-Host "Applying Network Tuning..." -ForegroundColor Yellow
 
@@ -200,7 +200,7 @@ function Run-Network {
 # =========================
 # RESET MODE
 # =========================
-function Reset-Network {
+function Reset-Default {
 
     Write-Host "Restoring Adapter Defaults..." -ForegroundColor Yellow
 
@@ -354,3 +354,4 @@ switch ($choice) {
     }
 
 }
+
