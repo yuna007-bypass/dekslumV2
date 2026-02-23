@@ -1,75 +1,179 @@
 #Requires -RunAsAdministrator
 
 Clear-Host
+
 Write-Host "1 : Install Dekslum"
 Write-Host "2 : Uninstall Dekslum"
 Write-Host ""
+
 $choice = Read-Host "Select (1/2)"
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
-# -------- OPTION 1 : BOOST --------
+# ================================
+# EXTREME CACHE CLEANER (SILENT)
+# ================================
+
+function Remove-Files($path) {
+    if (Test-Path $path) {
+        try {
+            Get-ChildItem $path -Recurse -Force -ErrorAction SilentlyContinue |
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+        } catch {}
+    }
+}
+
+function Scan-And-Clean($basePath) {
+    if (Test-Path $basePath) {
+        Get-ChildItem $basePath -Directory -Recurse -Force -ErrorAction SilentlyContinue |
+        Where-Object {
+            $_.Name -match '(?i)cache|temp|logs'
+            -and $_.FullName -notmatch '(?i)userdata|content|projects|profiles'
+        } |
+        ForEach-Object {
+            try {
+                Get-ChildItem $_.FullName -Recurse -Force -ErrorAction SilentlyContinue |
+                Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+            } catch {}
+        }
+    }
+}
+
+function Run-Cleaner {
+
+    Remove-Files "$env:TEMP"
+    Remove-Files "C:\Windows\Temp"
+    Remove-Files "C:\Windows\Prefetch"
+
+    Remove-Files "$env:LOCALAPPDATA\Temp"
+    Remove-Files "$env:LOCALAPPDATA\Microsoft\Windows\INetCache"
+    Remove-Files "$env:LOCALAPPDATA\Microsoft\Windows\Explorer"
+    Remove-Files "$env:LOCALAPPDATA\CrashDumps"
+
+    Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
+    Remove-Files "C:\Windows\SoftwareDistribution\Download"
+    Start-Service wuauserv -ErrorAction SilentlyContinue
+
+    Remove-Files "$env:LOCALAPPDATA\NVIDIA\DXCache"
+    Remove-Files "$env:LOCALAPPDATA\NVIDIA\GLCache"
+    Remove-Files "$env:LOCALAPPDATA\AMD\DxCache"
+    Remove-Files "$env:LOCALAPPDATA\AMD\GLCache"
+    Remove-Files "$env:LOCALAPPDATA\D3DSCache"
+
+    Remove-Files "$env:LOCALAPPDATA\Google\Chrome\User Data\Default\Cache"
+    Remove-Files "$env:LOCALAPPDATA\Microsoft\Edge\User Data\Default\Cache"
+
+    Remove-Files "$env:LOCALAPPDATA\FiveM\FiveM.app\data\cache"
+    Remove-Files "$env:LOCALAPPDATA\FiveM\FiveM.app\data\server-cache"
+    Remove-Files "$env:LOCALAPPDATA\FiveM\FiveM.app\data\server-cache-priv"
+
+    Remove-Files "$env:APPDATA\discord\Cache"
+    Remove-Files "$env:APPDATA\discord\Code Cache"
+    Remove-Files "$env:APPDATA\discord\GPUCache"
+
+    Remove-Files "C:\ProgramData\Microsoft\Windows\WER"
+
+    Scan-And-Clean "$env:LOCALAPPDATA"
+    Scan-And-Clean "$env:APPDATA"
+}
+
+# ================================
+# OPTION 1 : BOOST + CLEAN
+# ================================
+
 function Run-Boost {
 
-    Write-Host "Applying Windows Core Boost..." -ForegroundColor Yellow
+    Clear-Host
+    Write-Host "Processing..." -ForegroundColor Yellow
 
+    # Power Plan
     powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 | Out-Null
     $ultimate = powercfg -l | Select-String "Ultimate Performance"
+
     if ($ultimate) {
         $guid = ($ultimate -split '\s+')[3]
-        powercfg -setactive $guid
+        powercfg -setactive $guid | Out-Null
     }
 
-    bcdedit /set disabledynamictick yes
-    bcdedit /set tscsyncpolicy Enhanced
+    # Boot Config
+    bcdedit /set disabledynamictick yes | Out-Null
+    bcdedit /set tscsyncpolicy Enhanced | Out-Null
+    bcdedit /deletevalue useplatformclock | Out-Null
 
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 4294967295 /f
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v SystemResponsiveness /t REG_DWORD /d 0 /f
+    # Registry
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 0xffffffff /f | Out-Null
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v SystemResponsiveness /t REG_DWORD /d 0 /f | Out-Null
 
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "GPU Priority" /t REG_DWORD /d 8 /f
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v Priority /t REG_DWORD /d 6 /f
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "Scheduling Category" /t REG_SZ /d High /f
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "SFIO Priority" /t REG_SZ /d High /f
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "GPU Priority" /t REG_DWORD /d 8 /f | Out-Null
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v Priority /t REG_DWORD /d 6 /f | Out-Null
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "Scheduling Category" /t REG_SZ /d High /f | Out-Null
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "SFIO Priority" /t REG_SZ /d High /f | Out-Null
 
-    reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 0 /f
+    reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 0 /f | Out-Null
 
-    netsh int tcp set global autotuninglevel=normal
-    netsh int tcp set global rss=enabled
-    netsh int tcp set global ecncapability=disabled
-    netsh int tcp set global timestamps=disabled
+    # Network
+    netsh int tcp set global autotuninglevel=normal | Out-Null
+    netsh int tcp set global rss=enabled | Out-Null
+    netsh int tcp set global ecncapability=disabled | Out-Null
+    netsh int tcp set global timestamps=disabled | Out-Null
 
-    bcdedit /deletevalue useplatformclock
+    # Run Cache Cleaner
+    Run-Cleaner
+
+    Clear-Host
 
     Write-Host ""
-    Write-Host "Boost Applied Successfully!" -ForegroundColor Green
-    Write-Host ">> Restart Computer <<" -ForegroundColor Magenta
+    Write-Host "Successfully!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Press Enter to continue..." -ForegroundColor Gray
+
+    Read-Host
 }
 
-# -------- OPTION 2 : RESET --------
+# ================================
+# OPTION 2 : RESET
+# ================================
+
 function Reset-Default {
 
-    Write-Host "Resetting System..." -ForegroundColor Yellow
+    Clear-Host
+    Write-Host "Resetting..." -ForegroundColor Yellow
 
-    powercfg -setactive SCHEME_BALANCED
+    powercfg -setactive SCHEME_BALANCED | Out-Null
 
-    bcdedit /deletevalue disabledynamictick
-    bcdedit /deletevalue tscsyncpolicy
-    bcdedit /set useplatformclock true
+    bcdedit /deletevalue disabledynamictick | Out-Null
+    bcdedit /deletevalue tscsyncpolicy | Out-Null
+    bcdedit /set useplatformclock true | Out-Null
 
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 10 /f
-    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v SystemResponsiveness /t REG_DWORD /d 20 /f
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 10 /f | Out-Null
+    reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v SystemResponsiveness /t REG_DWORD /d 20 /f | Out-Null
 
-    netsh int tcp reset
+    netsh int tcp reset | Out-Null
+
+    Clear-Host
 
     Write-Host ""
-    Write-Host "System Restored to Default!" -ForegroundColor Green
-    Write-Host ">> Restart Computer <<" -ForegroundColor Magenta
+    Write-Host "Successfully!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Press Enter to continue..." -ForegroundColor Gray
+
+    Read-Host
 }
 
-# -------- MENU CONTROL --------
+# ================================
+# MENU
+# ================================
+
 switch ($choice) {
+
     "1" { Run-Boost }
+
     "2" { Reset-Default }
-    default { Write-Host "Invalid Selection" -ForegroundColor Red }
+
+    default {
+        Write-Host "Invalid Selection" -ForegroundColor Red
+        Start-Sleep 2
+    }
+
 }
