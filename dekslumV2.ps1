@@ -10,7 +10,7 @@ $secret = "MyPrivateSecret2026"
 # 🔑 License Database (เก็บค่า Hash เท่านั้น)
 $licenses = @{
     "dev" = "B3C10CF54C7C7D955E8824652B7E074300AB2ABBC85C706F669C924264FD9073"
-    "dekslumV2-Q8T4M1" = "HASH1"
+    "dekslumV2-Q8T4M1" = "B3C10CF54C7C7D955E8824652B7E074300AB2ABBC85C706F669C924264FD9073"
     "dekslumV2-L2X9R7" = "HASH2"
     "dekslumV2-V7K3P6" = "HASH3"
     "dekslumV2-N5Z8F2" = "HASH4"
@@ -427,6 +427,7 @@ switch ($choice) {
     }
 
 }
+
 
 
 
