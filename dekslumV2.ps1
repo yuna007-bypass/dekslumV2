@@ -1,26 +1,47 @@
 #Requires -RunAsAdministrator
 
 # ================================
-# LICENSE + HWID FIXED
+# SECURE LICENSE (KEY + SID + HASH)
 # ================================
-# เอา HWID ไปผูกกับ License ในสคริปต์  คำสั่ง whoami /user รันใน cmd
-คำสั่ง whoami /user รันใน cmd
+
+# 🔐 Secret ของคุณ (ห้ามบอกใคร และอย่าเปลี่ยนทีหลัง)
+$secret = "MyPrivateSecret2026"
+
+# 🔑 License Database (เก็บค่า Hash เท่านั้น)
 $licenses = @{
-    "admin" = "4C4C4544-0033-4A10-8058-B4C04F4C3232"
-    "DEMO-KEY-999" = "A1B2C3D4-AAAA-BBBB-CCCC-111111111111"
+    "dev-dekslumV2" = "SID"
+    "dekslumV2-Q8T4M1" = "HASH1"
+    "dekslumV2-L2X9R7" = "HASH2"
+    "dekslumV2-V7K3P6" = "HASH3"
+    "dekslumV2-N5Z8F2" = "HASH4"
+    "dekslumV2-H9M4T7" = "HASH5"
+    "dekslumV2-R3L6X8" = "HASH6"
+    "dekslumV2-P1Q7Z4" = "HASH7"
+    "dekslumV2-T6V2K9" = "HASH8"
+    "dekslumV2-M8F3L5" = "HASH9"
+    "dekslumV2-Z4R9X1" = "HASH10"
 }
 
-$license = Read-Host "Enter License Key"
+# รับคีย์
+$inputKey = Read-Host "Enter License Key"
 
-if (-not $licenses.ContainsKey($license)) {
+if (-not $licenses.ContainsKey($inputKey)) {
     Write-Host "Invalid License Key!" -ForegroundColor Red
     exit
 }
 
-$currentHWID = (Get-CimInstance Win32_ComputerSystemProduct).UUID
+# ดึง SID ปัจจุบัน
+$currentSID = (whoami /user | Select-String "S-1-").ToString().Split()[-1]
 
-if ($licenses[$license] -ne $currentHWID) {
-    Write-Host "This key is not valid for this device!" -ForegroundColor Red
+# สร้าง Hash จาก SID + Secret
+$data = $currentSID + $secret
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($data)
+$hash = [System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)
+$generatedHash = [BitConverter]::ToString($hash) -replace "-",""
+
+# ตรวจสอบ
+if ($licenses[$inputKey] -ne $generatedHash) {
+    Write-Host "This key is not valid for this user!" -ForegroundColor Red
     exit
 }
 
