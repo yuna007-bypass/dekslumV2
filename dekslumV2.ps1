@@ -377,7 +377,7 @@ function Reset-Default {
     
     Apply-Settings $ResetDefault
     
-    Clear-Host
+    #Clear-Host
     #Write-Host "Resetting..." -ForegroundColor Yellow
 
     powercfg -setactive SCHEME_BALANCED | Out-Null
@@ -416,3 +416,4 @@ switch ($choice) {
     }
 
 }
+
