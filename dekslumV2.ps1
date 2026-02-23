@@ -90,7 +90,7 @@ function Scan-And-Clean($basePath) {
     }
 }
 
-function Run-Boost {
+function Run-CacheCleaner {
 # ----------------
 # Windows TEMP
 # ----------------
@@ -144,11 +144,90 @@ function Run-Boost {
     Scan-And-Clean "$env:APPDATA"
 }
 
+$adapterName = "Ethernet"
+
+#Write-Host "Tuning adapter: $adapterName"
+
+# ============================
+# Network Advanced Properties
+# ============================
+
+$BoostSettings = @{
+    # ===== Speed =====
+    "Speed & Duplex" = "2.5 Gbps Full Duplex"
+
+    # ===== Power Saving =====
+    "Advanced EEE" = "Disabled"
+    "Energy-Efficient Ethernet" = "Disabled"
+    "Green Ethernet" = "Disabled"
+    "Gigabit Lite" = "Disabled"
+    "Power Saving Mode" = "Disabled"
+
+    # ===== Latency Optimize =====
+    "Flow Control" = "Disabled"
+    "Interrupt Moderation" = "Disabled"
+
+    # ===== RSS =====
+    "Receive Side Scaling" = "Enabled"
+    "Maximum Number of RSS Queues" = "4"
+
+    # ===== Buffers =====
+    "Receive Buffers" = "32"
+    "Transmit Buffers" = "64"
+
+    # ===== Jumbo Frame =====
+    "Jumbo Frame" = "9014 Bytes"
+
+    # ===== Offloads =====
+    "IPv4 Checksum Offload" = "Disabled"
+    "TCP Checksum Offload (IPv4)" = "Disabled"
+    "TCP Checksum Offload (IPv6)" = "Disabled"
+    "UDP Checksum Offload (IPv4)" = "Disabled"
+    "UDP Checksum Offload (IPv6)" = "Disabled"
+    "Large Send Offload v2 (IPv4)" = "Disabled"
+    "Large Send Offload v2 (IPv6)" = "Disabled"
+    "ARP Offload" = "Disabled"
+    "NS Offload" = "Disabled"
+
+    # ===== VLAN =====
+    "Priority & VLAN" = "Priority & VLAN Disabled"
+    "VLAN ID" = "0"
+
+    # ===== Wake =====
+    "Shutdown Wake-On-Lan" = "Disabled"
+    "Wake on Magic Packet" = "Disabled"
+    "Wake on pattern match" = "Disabled"
+}
+
 # ================================
 # OPTION 1 : BOOST + CLEAN
 # ================================
 
 function Run-Boost {
+    Write-Host "Tuning adapter: $adapterName"
+# ============================
+# Apply Settings
+# ============================
+
+foreach ($item in $BoostSettings.GetEnumerator()) {
+    try {
+        Set-NetAdapterAdvancedProperty `
+            -Name $adapterName `
+            -DisplayName $item.Key `
+            -DisplayValue $item.Value `
+            -ErrorAction SilentlyContinue
+    } catch {}
+}
+
+# Restart Adapter
+Write-Host "Restarting adapter..."
+Disable-NetAdapter -Name $adapterName -Confirm:$false
+Start-Sleep -Seconds 3
+Enable-NetAdapter -Name $adapterName -Confirm:$false
+
+Write-Host "Complete."
+    # Run Cache Cleaner 
+    Run-CacheCleaner
 
     Clear-Host
     Write-Host "Processing..." -ForegroundColor Yellow
@@ -164,6 +243,14 @@ $planName = "Performance Dekslum"
 $existing = powercfg -l | Select-String $planName
 if ($existing) {
     $oldGUID = ($existing -split '\s+')[3]
+
+    # ถ้าแผนนี้กำลัง Active อยู่ ให้สลับไป Balanced ก่อน
+    $active = powercfg -getactivescheme
+    if ($active -match $oldGUID) {
+        powercfg -setactive SCHEME_BALANCED | Out-Null
+        Start-Sleep -Milliseconds 500
+    }
+
     powercfg -delete $oldGUID | Out-Null
 }
 
@@ -203,34 +290,102 @@ powercfg -setactive $newGUID | Out-Null
     netsh int tcp set global ecncapability=disabled | Out-Null
     netsh int tcp set global timestamps=disabled | Out-Null
 
-    # Run Cache Cleaner 
-    Run-Boost
-
-    Clear-Host
-
-Write-Host "1 : Install Demoshop"
-Write-Host "2 : Uninstall Demoshop"
-Write-Host ""
-Write-Host "Select (1/2): 1"
-Write-Host ""
-Write-Host "Successfully!" -ForegroundColor Green
-Write-Host ""
-Write-Host "Press Enter to continue..." -ForegroundColor Gray
-
-Read-Host
-exit
 }
 
 # ================================
 # OPTION 2 : RESET
 # ================================
+# ============================
+# RESET SETTINGS (DEFAULT)
+# ============================
 
+$ResetDefault = @{
+
+    # Speed (Auto Negotiation)
+    "Speed & Duplex" = "Auto Negotiation"
+
+    # Power Saving
+    "Advanced EEE" = "Enabled"
+    "Energy-Efficient Ethernet" = "Enabled"
+    "Green Ethernet" = "Enabled"
+    "Gigabit Lite" = "Enabled"
+    "Power Saving Mode" = "Enabled"
+
+    # Latency
+    "Flow Control" = "Rx & Tx Enabled"
+    "Interrupt Moderation" = "Enabled"
+
+    # RSS
+    "Receive Side Scaling" = "Enabled"
+    "Maximum Number of RSS Queues" = "2"
+
+    # Buffers (ค่าทั่วไป)
+    "Receive Buffers" = "256"
+    "Transmit Buffers" = "512"
+
+    # Jumbo
+    "Jumbo Frame" = "Disabled"
+
+    # Offloads
+    "IPv4 Checksum Offload" = "Rx & Tx Enabled"
+    "TCP Checksum Offload (IPv4)" = "Rx & Tx Enabled"
+    "TCP Checksum Offload (IPv6)" = "Rx & Tx Enabled"
+    "UDP Checksum Offload (IPv4)" = "Rx & Tx Enabled"
+    "UDP Checksum Offload (IPv6)" = "Rx & Tx Enabled"
+    "Large Send Offload v2 (IPv4)" = "Enabled"
+    "Large Send Offload v2 (IPv6)" = "Enabled"
+    "ARP Offload" = "Enabled"
+    "NS Offload" = "Enabled"
+
+    # VLAN
+    "Priority & VLAN" = "Priority & VLAN Enabled"
+    "VLAN ID" = "0"
+
+    # Wake
+    "Shutdown Wake-On-Lan" = "Enabled"
+    "Wake on Magic Packet" = "Enabled"
+    "Wake on pattern match" = "Enabled"
+}
+
+# ============================
+# FUNCTION
+# ============================
+
+function Apply-Settings($settings) {
+
+    Write-Host "Tuning adapter: $adapterName"
+
+    foreach ($item in $settings.GetEnumerator()) {
+        try {
+            Set-NetAdapterAdvancedProperty `
+                -Name $adapterName `
+                -DisplayName $item.Key `
+                -DisplayValue $item.Value `
+                -ErrorAction SilentlyContinue
+        } catch {}
+    }
+
+    Write-Host "Restarting adapter..."
+    Disable-NetAdapter -Name $adapterName -Confirm:$false
+    Start-Sleep -Seconds 3
+    Enable-NetAdapter -Name $adapterName -Confirm:$false
+
+    Write-Host "Complete." -ForegroundColor Green
+}
 function Reset-Default {
+    Apply-Settings $ResetDefault
 
     Clear-Host
     Write-Host "Resetting..." -ForegroundColor Yellow
 
     powercfg -setactive SCHEME_BALANCED | Out-Null
+        # ลบ Performance Dekslum ถ้ามี
+    $planName = "Performance Dekslum"
+    $existing = powercfg -l | Select-String $planName
+    if ($existing) {
+        $oldGUID = ($existing -split '\s+')[3]
+        powercfg -delete $oldGUID | Out-Null
+    }
 
     bcdedit /deletevalue disabledynamictick | Out-Null
     bcdedit /deletevalue tscsyncpolicy | Out-Null
@@ -241,21 +396,7 @@ function Reset-Default {
 
     netsh int tcp reset | Out-Null
 
-    Clear-Host
-
-Write-Host "1 : Install Demoshop"
-Write-Host "2 : Uninstall Demoshop"
-Write-Host ""
-Write-Host "Select (1/2): 2"
-Write-Host ""
-Write-Host "Successfully!" -ForegroundColor Green
-Write-Host ""
-Write-Host "Press Enter to continue..." -ForegroundColor Gray
-
-Read-Host
-exit
 }
-
 # ================================
 # MENU
 # ================================
@@ -272,8 +413,3 @@ switch ($choice) {
     }
 
 }
-
-
-
-
-
