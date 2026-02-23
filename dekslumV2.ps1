@@ -123,12 +123,17 @@ function Run-Boost {
 
     Clear-Host
 
-    Write-Host ""
-    Write-Host "Successfully!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Press Enter to continue..." -ForegroundColor Gray
+Write-Host "1 : Install Demoshop"
+Write-Host "2 : Uninstall Demoshop"
+Write-Host ""
+Write-Host "Select (1/2): 1"
+Write-Host ""
+Write-Host "Successfully!" -ForegroundColor Green
+Write-Host ""
+Write-Host "Press Enter to continue..." -ForegroundColor Gray
 
-    Read-Host
+Read-Host
+exit
 }
 
 # ================================
@@ -153,12 +158,17 @@ function Reset-Default {
 
     Clear-Host
 
-    Write-Host ""
-    Write-Host "Successfully!" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "Press Enter to continue..." -ForegroundColor Gray
+Write-Host "1 : Install Demoshop"
+Write-Host "2 : Uninstall Demoshop"
+Write-Host ""
+Write-Host "Select (1/2): 2"
+Write-Host ""
+Write-Host "Successfully!" -ForegroundColor Green
+Write-Host ""
+Write-Host "Press Enter to continue..." -ForegroundColor Gray
 
-    Read-Host
+Read-Host
+exit
 }
 
 # ================================
@@ -177,3 +187,4 @@ switch ($choice) {
     }
 
 }
+
