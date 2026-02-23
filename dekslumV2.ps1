@@ -220,16 +220,16 @@ foreach ($item in $BoostSettings.GetEnumerator()) {
 }
 
 # Restart Adapter
-Write-Host "Restarting adapter..."
+#Write-Host "Restarting adapter..."
 Disable-NetAdapter -Name $adapterName -Confirm:$false
 Start-Sleep -Seconds 3
 Enable-NetAdapter -Name $adapterName -Confirm:$false
 
-Write-Host "Complete."
+#Write-Host "Complete."
     # Run Cache Cleaner 
     Run-CacheCleaner
 
-    Clear-Host
+    #Clear-Host
     Write-Host "Processing..." -ForegroundColor Yellow
 
 # =========================================
@@ -427,6 +427,7 @@ switch ($choice) {
     }
 
 }
+
 
 
 
