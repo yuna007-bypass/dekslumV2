@@ -28,8 +28,8 @@ function Scan-And-Clean($basePath) {
     if (Test-Path $basePath) {
         Get-ChildItem $basePath -Directory -Recurse -Force -ErrorAction SilentlyContinue |
         Where-Object {
-            $_.Name -match '(?i)cache|temp|logs'
-            -and $_.FullName -notmatch '(?i)userdata|content|projects|profiles'
+            ($_.Name -match '(?i)cache|temp|logs') -and
+             ($_.FullName -notmatch '(?i)userdata|content|projects|profiles')
         } |
         ForEach-Object {
             try {
@@ -187,4 +187,5 @@ switch ($choice) {
     }
 
 }
+
 
