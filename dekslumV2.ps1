@@ -143,82 +143,6 @@ function Run-Boost {
     Scan-And-Clean "$env:LOCALAPPDATA"
     Scan-And-Clean "$env:APPDATA"
 }
-# =========================
-# APPLY MODE
-# =========================
-function Run-Boost {
-
-    Write-Host "Applying Network Tuning..." -ForegroundColor Yellow
-
-    $settings = @{
-        "Speed & Duplex"                   = "Auto Negotiation"
-        "Advanced EEE"                     = "Disabled"
-        "Energy-Efficient Ethernet"        = "Disabled"
-        "Green Ethernet"                   = "Disabled"
-        "Gigabit Lite"                     = "Disabled"
-        "Power Saving Mode"                = "Disabled"
-        "Flow Control"                     = "Disabled"
-        "Interrupt Moderation"             = "Disabled"
-        "Receive Side Scaling"             = "Enabled"
-        "Maximum Number of RSS Queues"     = "4"
-        "Receive Buffers"                  = "32"
-        "Transmit Buffers"                 = "64"
-        "Jumbo Frame"                      = "9014 Bytes"
-        "IPv4 Checksum Offload"            = "Disabled"
-        "TCP Checksum Offload (IPv4)"      = "Disabled"
-        "TCP Checksum Offload (IPv6)"      = "Disabled"
-        "UDP Checksum Offload (IPv4)"      = "Disabled"
-        "UDP Checksum Offload (IPv6)"      = "Disabled"
-        "Large Send Offload v2 (IPv4)"     = "Disabled"
-        "Large Send Offload v2 (IPv6)"     = "Disabled"
-        "ARP Offload"                      = "Disabled"
-        "NS Offload"                       = "Disabled"
-        "Priority & VLAN"                  = "Priority & VLAN Disabled"
-        "VLAN ID"                          = "0"
-        "Shutdown Wake-On-Lan"             = "Disabled"
-        "Wake on Magic Packet"             = "Disabled"
-        "Wake on pattern match"            = "Disabled"
-    }
-
-    foreach ($item in $settings.GetEnumerator()) {
-        Set-NetAdapterAdvancedProperty -Name $adapterName `
-            -DisplayName $item.Key `
-            -DisplayValue $item.Value `
-            -ErrorAction SilentlyContinue
-    }
-
-    Restart-Adapter
-    Write-Host "Tuning Applied Successfully!" -ForegroundColor Green
-}
-
-# =========================
-# RESET MODE
-# =========================
-function Reset-Default {
-
-    Write-Host "Restoring Adapter Defaults..." -ForegroundColor Yellow
-
-    # คืนค่า Advanced Property ทั้งหมดเป็นค่า Driver Default
-    Get-NetAdapterAdvancedProperty -Name $adapterName | ForEach-Object {
-        Set-NetAdapterAdvancedProperty -Name $adapterName `
-            -RegistryKeyword $_.RegistryKeyword `
-            -RegistryValue $_.DefaultRegistryValue `
-            -ErrorAction SilentlyContinue
-    }
-
-    Restart-Adapter
-    Write-Host "Adapter Restored to Default!" -ForegroundColor Green
-}
-
-# =========================
-# RESTART FUNCTION
-# =========================
-function Restart-Adapter {
-    Write-Host "Restarting Adapter..."
-    Disable-NetAdapter -Name $adapterName -Confirm:$false
-    Start-Sleep -Seconds 3
-    Enable-NetAdapter -Name $adapterName -Confirm:$false
-}
 
 # ================================
 # OPTION 1 : BOOST + CLEAN
@@ -348,6 +272,7 @@ switch ($choice) {
     }
 
 }
+
 
 
 
