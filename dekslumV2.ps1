@@ -204,7 +204,7 @@ $BoostSettings = @{
 # ================================
 
 function Run-Boost {
-    Write-Host "Tuning adapter: $adapterName"
+    Write-Host "Success" -ForegroundColor Green
 # ============================
 # Apply Settings
 # ============================
@@ -353,7 +353,7 @@ $ResetDefault = @{
 
 function Apply-Settings($settings) {
 
-    Write-Host "Tuning adapter: $adapterName"
+    #Write-Host "Tuning adapter: $adapterName"
 
     foreach ($item in $settings.GetEnumerator()) {
         try {
@@ -365,18 +365,20 @@ function Apply-Settings($settings) {
         } catch {}
     }
 
-    Write-Host "Restarting adapter..."
+    #Write-Host "Restarting adapter..."
     Disable-NetAdapter -Name $adapterName -Confirm:$false
     Start-Sleep -Seconds 3
     Enable-NetAdapter -Name $adapterName -Confirm:$false
 
-    Write-Host "Complete." -ForegroundColor Green
+    Write-Host "Success" -ForegroundColor Green
+    Start-Sleep -Seconds 1
 }
 function Reset-Default {
+    
     Apply-Settings $ResetDefault
-
+    
     Clear-Host
-    Write-Host "Resetting..." -ForegroundColor Yellow
+    #Write-Host "Resetting..." -ForegroundColor Yellow
 
     powercfg -setactive SCHEME_BALANCED | Out-Null
         # ลบ Performance Dekslum ถ้ามี
@@ -395,7 +397,8 @@ function Reset-Default {
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v SystemResponsiveness /t REG_DWORD /d 20 /f | Out-Null
 
     netsh int tcp reset | Out-Null
-
+    
+    Write-Host "Success" -ForegroundColor Green
 }
 # ================================
 # MENU
