@@ -149,61 +149,82 @@ function Run-Cleaner {
     Scan-And-Clean "$env:LOCALAPPDATA"
     Scan-And-Clean "$env:APPDATA"
 }
-$adapterName = "Ethernet"   # เปลี่ยนชื่อให้ตรงกับการ์ดของคุณถ้าไม่ใช่ Ethernet
+# =========================
+# APPLY MODE
+# =========================
+function Run-Network {
 
-Write-Host "Tuning adapter: $adapterName"
+    Write-Host "Applying Network Tuning..." -ForegroundColor Yellow
 
-# ===== Speed =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Speed & Duplex" -DisplayValue "2.5 Gbps Full Duplex"
+    $settings = @{
+        "Speed & Duplex"                   = "Auto Negotiation"
+        "Advanced EEE"                     = "Disabled"
+        "Energy-Efficient Ethernet"        = "Disabled"
+        "Green Ethernet"                   = "Disabled"
+        "Gigabit Lite"                     = "Disabled"
+        "Power Saving Mode"                = "Disabled"
+        "Flow Control"                     = "Disabled"
+        "Interrupt Moderation"             = "Disabled"
+        "Receive Side Scaling"             = "Enabled"
+        "Maximum Number of RSS Queues"     = "4"
+        "Receive Buffers"                  = "32"
+        "Transmit Buffers"                 = "64"
+        "Jumbo Frame"                      = "9014 Bytes"
+        "IPv4 Checksum Offload"            = "Disabled"
+        "TCP Checksum Offload (IPv4)"      = "Disabled"
+        "TCP Checksum Offload (IPv6)"      = "Disabled"
+        "UDP Checksum Offload (IPv4)"      = "Disabled"
+        "UDP Checksum Offload (IPv6)"      = "Disabled"
+        "Large Send Offload v2 (IPv4)"     = "Disabled"
+        "Large Send Offload v2 (IPv6)"     = "Disabled"
+        "ARP Offload"                      = "Disabled"
+        "NS Offload"                       = "Disabled"
+        "Priority & VLAN"                  = "Priority & VLAN Disabled"
+        "VLAN ID"                          = "0"
+        "Shutdown Wake-On-Lan"             = "Disabled"
+        "Wake on Magic Packet"             = "Disabled"
+        "Wake on pattern match"            = "Disabled"
+    }
 
-# ===== Disable Power Saving / Green =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Advanced EEE" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Energy-Efficient Ethernet" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Green Ethernet" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Gigabit Lite" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Power Saving Mode" -DisplayValue "Disabled"
+    foreach ($item in $settings.GetEnumerator()) {
+        Set-NetAdapterAdvancedProperty -Name $adapterName `
+            -DisplayName $item.Key `
+            -DisplayValue $item.Value `
+            -ErrorAction SilentlyContinue
+    }
 
-# ===== Latency Optimize =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Flow Control" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Interrupt Moderation" -DisplayValue "Disabled"
+    Restart-Adapter
+    Write-Host "Tuning Applied Successfully!" -ForegroundColor Green
+}
 
-# ===== RSS =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Receive Side Scaling" -DisplayValue "Enabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Maximum Number of RSS Queues" -DisplayValue "4"
+# =========================
+# RESET MODE
+# =========================
+function Reset-Network {
 
-# ===== Buffers =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Receive Buffers" -DisplayValue "32"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Transmit Buffers" -DisplayValue "64"
+    Write-Host "Restoring Adapter Defaults..." -ForegroundColor Yellow
 
-# ===== Jumbo Frame (ใช้เฉพาะถ้าอุปกรณ์ทั้งวงรองรับ) =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Jumbo Frame" -DisplayValue "9014 Bytes"
+    # คืนค่า Advanced Property ทั้งหมดเป็นค่า Driver Default
+    Get-NetAdapterAdvancedProperty -Name $adapterName | ForEach-Object {
+        Set-NetAdapterAdvancedProperty -Name $adapterName `
+            -RegistryKeyword $_.RegistryKeyword `
+            -RegistryValue $_.DefaultRegistryValue `
+            -ErrorAction SilentlyContinue
+    }
 
-# ===== Disable Offloads =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "IPv4 Checksum Offload" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "TCP Checksum Offload (IPv4)" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "TCP Checksum Offload (IPv6)" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "UDP Checksum Offload (IPv4)" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "UDP Checksum Offload (IPv6)" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Large Send Offload v2 (IPv4)" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Large Send Offload v2 (IPv6)" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "ARP Offload" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "NS Offload" -DisplayValue "Disabled"
+    Restart-Adapter
+    Write-Host "Adapter Restored to Default!" -ForegroundColor Green
+}
 
-# ===== Disable VLAN / Priority =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Priority & VLAN" -DisplayValue "Priority & VLAN Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "VLAN ID" -DisplayValue "0"
-
-# ===== Disable Wake Features =====
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Shutdown Wake-On-Lan" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Wake on Magic Packet" -DisplayValue "Disabled"
-Set-NetAdapterAdvancedProperty -Name $adapterName -DisplayName "Wake on pattern match" -DisplayValue "Disabled"
-
-Write-Host "Restarting adapter..."
-Disable-NetAdapter -Name $adapterName -Confirm:$false
-Start-Sleep -Seconds 3
-Enable-NetAdapter -Name $adapterName -Confirm:$false
-
-Write-Host "Complete."
+# =========================
+# RESTART FUNCTION
+# =========================
+function Restart-Adapter {
+    Write-Host "Restarting Adapter..."
+    Disable-NetAdapter -Name $adapterName -Confirm:$false
+    Start-Sleep -Seconds 3
+    Enable-NetAdapter -Name $adapterName -Confirm:$false
+}
 
 # ================================
 # OPTION 1 : BOOST + CLEAN
