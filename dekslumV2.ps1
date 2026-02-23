@@ -286,7 +286,7 @@ powercfg -setactive $newGUID | Out-Null
     netsh int tcp set global timestamps=disabled | Out-Null
 
     # Run Cache Cleaner
-    Run-Cleaner
+    Run-Boost
 
     Clear-Host
 
@@ -354,4 +354,3 @@ switch ($choice) {
     }
 
 }
-
