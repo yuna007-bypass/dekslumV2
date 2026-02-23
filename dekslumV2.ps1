@@ -204,7 +204,7 @@ $BoostSettings = @{
 # ================================
 
 function Run-Boost {
-    Write-Host "Success" -ForegroundColor Green
+    #Write-Host "Success" -ForegroundColor Green
 # ============================
 # Apply Settings
 # ============================
@@ -375,7 +375,7 @@ function Apply-Settings($settings) {
     Start-Sleep -Seconds 3
     Enable-NetAdapter -Name $adapterName -Confirm:$false
 
-    Write-Host "Success" -ForegroundColor Green
+    #Write-Host "Success" -ForegroundColor Green
     Start-Sleep -Seconds 1
 }
 function Reset-Default {
@@ -403,7 +403,7 @@ function Reset-Default {
 
     netsh int tcp reset | Out-Null
     
-    Write-Host "Success" -ForegroundColor Green
+    #Write-Host "Success" -ForegroundColor Green
 
     # ==== หน้าจอแบบในรูป ====
     Write-Host ""
@@ -427,5 +427,6 @@ switch ($choice) {
     }
 
 }
+
 
 
