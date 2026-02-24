@@ -476,12 +476,6 @@ New-ItemProperty `
 reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 1 /f | Out-Null
 
 
-# ========================= Start Xbox Services =========================
-
-Start-Service XblGameSave -ErrorAction SilentlyContinue
-Start-Service XboxGipSvc -ErrorAction SilentlyContinue
-Start-Service XboxNetApiSvc -ErrorAction SilentlyContinue
-
 # ลบ Priority ที่ตั้งไว้
 reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\FiveM_GTAProcess.exe" /f | Out-Null
 
@@ -523,5 +517,6 @@ switch ($choice) {
                                                                                  ═══════════════════════════════════════════════════════════════
                                                                                             Gamer Performance Acceleration System v2.0
                                                                                  ═══════════════════════════════════════════════════════════════
+
 
 
