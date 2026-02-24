@@ -319,6 +319,24 @@ New-ItemProperty `
 -Value 0 `
 -Force | Out-Null
 
+# ========================= Disable Defender (Realtime) =========================
+
+Set-MpPreference -DisableRealtimeMonitoring $true
+
+# ========================= Stop Xbox Services =========================
+
+Stop-Service XblGameSave -Force -ErrorAction SilentlyContinue
+Stop-Service XboxGipSvc -Force -ErrorAction SilentlyContinue
+Stop-Service XboxNetApiSvc -Force -ErrorAction SilentlyContinue
+
+# FiveM Priority = High (ถาวรทุกครั้งที่เปิดเกม)
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\FiveM_GTAProcess.exe\PerfOptions" /v CpuPriorityClass /t REG_DWORD /d 3 /f | Out-Null
+
+# Disable Background Apps (Global)
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" /v GlobalUserDisabled /t REG_DWORD /d 1 /f | Out-Null
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v BackgroundAppGlobalToggle /t REG_DWORD /d 0 /f | Out-Null
+
+
     # ==== หน้าจอแบบในรูป ====
     Write-Host ""
     Write-Host "Successfully" -ForegroundColor Green
@@ -461,6 +479,24 @@ New-ItemProperty `
 reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 1 /f | Out-Null
 
 
+# ========================= Enable Defender (Realtime) =========================
+
+Set-MpPreference -DisableRealtimeMonitoring $false
+
+# ========================= Start Xbox Services =========================
+
+Start-Service XblGameSave -ErrorAction SilentlyContinue
+Start-Service XboxGipSvc -ErrorAction SilentlyContinue
+Start-Service XboxNetApiSvc -ErrorAction SilentlyContinue
+
+# ลบ Priority ที่ตั้งไว้
+reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\FiveM_GTAProcess.exe" /f | Out-Null
+
+# Enable Background Apps (Default)
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" /v GlobalUserDisabled /t REG_DWORD /d 0 /f | Out-Null
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Search" /v BackgroundAppGlobalToggle /t REG_DWORD /d 1 /f | Out-Null
+
+
     # ==== หน้าจอแบบในรูป ====
     Write-Host ""
     Write-Host "Successfully" -ForegroundColor Green
@@ -483,3 +519,14 @@ switch ($choice) {
     }
 
 }
+
+
+                                                                                  ██████╗ ███████╗██╗  ██╗███████╗██╗     ██╗   ██╗███╗   ███╗
+                                                                                  ██╔══██╗██╔════╝██║ ██╔╝██╔════╝██║     ██║   ██║████╗ ████║
+                                                                                  ██║  ██║█████╗  █████╔╝ ███████╗██║     ██║   ██║██╔████╔██║
+                                                                                  ██║  ██║██╔══╝  ██╔═██╗ ╚════██║██║     ██║   ██║██║╚██╔╝██║
+                                                                                  ██████╔╝███████╗██║  ██╗███████║███████╗╚██████╔╝██║ ╚═╝ ██║
+                                                                                  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝
+                                                                                 ═══════════════════════════════════════════════════════════════
+                                                                                            Gamer Performance Acceleration System v2.0
+                                                                                 ═══════════════════════════════════════════════════════════════
