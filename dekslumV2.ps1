@@ -481,7 +481,7 @@ reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 1 /f | 
 
 # ========================= Enable Defender (Realtime) =========================
 
-Set-MpPreference -DisableRealtimeMonitoring $false
+#Set-MpPreference -DisableRealtimeMonitoring $false
 
 # ========================= Start Xbox Services =========================
 
@@ -530,3 +530,4 @@ switch ($choice) {
                                                                                  ═══════════════════════════════════════════════════════════════
                                                                                             Gamer Performance Acceleration System v2.0
                                                                                  ═══════════════════════════════════════════════════════════════
+
