@@ -323,7 +323,7 @@ New-ItemProperty `
 # ========================= Stop Xbox Services =========================
 
 Stop-Service XblGameSave -Force -ErrorAction SilentlyContinue
-Stop-Service XboxGipSvc -Force -ErrorAction SilentlyContinue
+Set-Service XboxGipSvc -StartupType Disabled
 Stop-Service XboxNetApiSvc -Force -ErrorAction SilentlyContinue
 
 # FiveM Priority = High (ถาวรทุกครั้งที่เปิดเกม)
@@ -517,6 +517,7 @@ switch ($choice) {
                                                                                  ═══════════════════════════════════════════════════════════════
                                                                                             Gamer Performance Acceleration System v2.0
                                                                                  ═══════════════════════════════════════════════════════════════
+
 
 
 
