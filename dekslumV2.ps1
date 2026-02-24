@@ -108,7 +108,7 @@ function Run-CacheCleaner {
 # Windows Update Cache
 # --------------------
     Stop-Service wuauserv -Force -ErrorAction SilentlyContinue
-    Remove-Files "C:\Windows\SoftwareDistribution\Download"
+    Remove-Files "C:\Windows\Softwaretribution\Download"
     Start-Service wuauserv -ErrorAction SilentlyContinue
 # ----------------
 # GPU Shader Cache
@@ -130,11 +130,11 @@ function Run-CacheCleaner {
     Remove-Files "$env:LOCALAPPDATA\FiveM\FiveM.app\data\server-cache"
     Remove-Files "$env:LOCALAPPDATA\FiveM\FiveM.app\data\server-cache-priv"
 # ----------------
-# Discord Cache
+# cord Cache
 # ---------------
-    #Remove-Files "$env:APPDATA\discord\Cache"
-    #Remove-Files "$env:APPDATA\discord\Code Cache"
-    #Remove-Files "$env:APPDATA\discord\GPUCache"
+    #Remove-Files "$env:APPDATA\cord\Cache"
+    #Remove-Files "$env:APPDATA\cord\Code Cache"
+    #Remove-Files "$env:APPDATA\cord\GPUCache"
 # ----------------
 # Windows Error Logs
 # ----------------
@@ -157,8 +157,8 @@ $BoostSettings = @{
     "Speed & Duplex" = "Auto Negotiation"
 
     # ===== Power Saving =====
-    "Advanced EEE" = "Disabled"
-    "Energy-Efficient Ethernet" = "Disabled"
+    "Advanced EEE" = "abled"
+    "Energy-Efficient Ethernet" = "abled"
     "Green Ethernet" = "Disabled"
     "Gigabit Lite" = "Disabled"
     "Power Saving Mode" = "Disabled"
@@ -319,9 +319,6 @@ New-ItemProperty `
 -Value 0 `
 -Force | Out-Null
 
-# ========================= Disable Defender (Realtime) =========================
-
-Set-MpPreference -DisableRealtimeMonitoring $true
 
 # ========================= Stop Xbox Services =========================
 
@@ -479,10 +476,6 @@ New-ItemProperty `
 reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 1 /f | Out-Null
 
 
-# ========================= Enable Defender (Realtime) =========================
-
-#Set-MpPreference -DisableRealtimeMonitoring $false
-
 # ========================= Start Xbox Services =========================
 
 Start-Service XblGameSave -ErrorAction SilentlyContinue
@@ -530,4 +523,5 @@ switch ($choice) {
                                                                                  ═══════════════════════════════════════════════════════════════
                                                                                             Gamer Performance Acceleration System v2.0
                                                                                  ═══════════════════════════════════════════════════════════════
+
 
