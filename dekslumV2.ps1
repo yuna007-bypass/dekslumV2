@@ -154,7 +154,7 @@ $adapterName = "Ethernet"
 
 $BoostSettings = @{
     # ===== Speed =====
-    "Speed & Duplex" = "2.5 Gbps Full Duplex"
+    "Speed & Duplex" = "Auto Negotiation"
 
     # ===== Power Saving =====
     "Advanced EEE" = "Disabled"
@@ -282,14 +282,43 @@ powercfg -setactive $newGUID | Out-Null
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "Scheduling Category" /t REG_SZ /d High /f | Out-Null
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Games" /v "SFIO Priority" /t REG_SZ /d High /f | Out-Null
 
-    reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 0 /f | Out-Null
 
     # Network
     netsh int tcp set global autotuninglevel=normal | Out-Null
     netsh int tcp set global rss=enabled | Out-Null
     netsh int tcp set global ecncapability=disabled | Out-Null
     netsh int tcp set global timestamps=disabled | Out-Null
-    
+
+# ============================================ # GhostBoost Clean Edition (Safe Tweaks) # ============================================
+# 1️⃣ Enable Hardware GPU Scheduling
+New-ItemProperty `
+-Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" `
+-Name "HwSchMode" `
+-PropertyType DWord `
+-Value 2 `
+-Force | Out-Null
+
+# 2️⃣ Disable Mouse Acceleration
+Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseSpeed" -Value "0"
+Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold1" -Value "0"
+Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold2" -Value "0"
+
+# 3️⃣ Enable Game Mode
+New-ItemProperty `
+-Path "HKCU:\Software\Microsoft\GameBar" `
+-Name "AllowAutoGameMode" `
+-PropertyType DWord `
+-Value 1 `
+-Force | Out-Null
+
+# 4️⃣ Disable Game DVR
+New-ItemProperty `
+-Path "HKCU:\System\GameConfigStore" `
+-Name "GameDVR_Enabled" `
+-PropertyType DWord `
+-Value 0 `
+-Force | Out-Null
+
     # ==== หน้าจอแบบในรูป ====
     Write-Host ""
     Write-Host "Successfully" -ForegroundColor Green
@@ -396,7 +425,7 @@ function Reset-Default {
 
     bcdedit /deletevalue disabledynamictick | Out-Null
     bcdedit /deletevalue tscsyncpolicy | Out-Null
-    bcdedit /set useplatformclock true | Out-Null
+    bcdedit /deletevalue useplatformclock | Out-Null
 
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v NetworkThrottlingIndex /t REG_DWORD /d 10 /f | Out-Null
     reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile" /v SystemResponsiveness /t REG_DWORD /d 20 /f | Out-Null
@@ -404,6 +433,33 @@ function Reset-Default {
     netsh int tcp reset | Out-Null
     
     #Write-Host "Success" -ForegroundColor Green
+
+# ============================================ # RESET GhostBoost Safe Tweaks # ============================================
+
+# 1️⃣ Disable Hardware GPU Scheduling (กลับเป็นค่า default)
+New-ItemProperty `
+-Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" `
+-Name "HwSchMode" `
+-PropertyType DWord `
+-Value 1 `
+-Force | Out-Null
+
+# 2️⃣ Enable Mouse Acceleration (ค่า Windows ปกติ)
+Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseSpeed" -Value "1"
+Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold1" -Value "6"
+Set-ItemProperty -Path "HKCU:\Control Panel\Mouse" -Name "MouseThreshold2" -Value "10"
+
+# 3️⃣ Disable Game Mode (ค่า default)
+New-ItemProperty `
+-Path "HKCU:\Software\Microsoft\GameBar" `
+-Name "AllowAutoGameMode" `
+-PropertyType DWord `
+-Value 0 `
+-Force | Out-Null
+
+# 4️⃣ Enable Game DVR (กลับค่าเดิม)
+reg add "HKCU\System\GameConfigStore" /v GameDVR_Enabled /t REG_DWORD /d 1 /f | Out-Null
+
 
     # ==== หน้าจอแบบในรูป ====
     Write-Host ""
